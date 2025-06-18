@@ -4,21 +4,14 @@ namespace EventAutomationBundle\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
-use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
-use Tourze\DoctrineTimestampBundle\Attribute\UpdateTimeColumn;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'ims_event_automation_trigger_log')]
 class TriggerLog
 {
     use TimestampableAware;
-    #[ListColumn(order: -1)]
-    #[ExportColumn]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
@@ -38,10 +31,7 @@ class TriggerLog
     #[ORM\Column(nullable: true, options: ['comment' => '创建人'])]
     private ?string $createdBy = null;
 
-    #[IndexColumn]
-    #[CreateTimeColumn]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '创建时间'])]#[UpdateTimeColumn]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '更新时间'])]public function getId(): ?int
+    public function getId(): ?int
     {
         return $this->id;
     }

@@ -5,24 +5,17 @@ namespace EventAutomationBundle\Entity;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
-use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
-use Tourze\DoctrineTimestampBundle\Attribute\UpdateTimeColumn;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
 use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
 use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
 use Tourze\EasyAdmin\Attribute\Column\BoolColumn;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Field\FormField;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'ims_event_automation_context')]
 class ContextConfig
 {
     use TimestampableAware;
-    #[ListColumn(order: -1)]
-    #[ExportColumn]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
@@ -52,15 +45,10 @@ class ContextConfig
     #[ORM\Column(type: 'json', nullable: true, options: ['comment' => '查询参数配置'])]
     private ?array $queryParams = null;
 
-    #[IndexColumn]
-    #[CreateTimeColumn]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '创建时间'])]#[UpdateTimeColumn]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '更新时间'])]#[BoolColumn]
+    #[BoolColumn]
     #[IndexColumn]
     #[TrackColumn]
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '有效', 'default' => 0])]
-    #[ListColumn(order: 97)]
-    #[FormField(order: 97)]
     private ?bool $valid = false;
 
     public function getId(): ?int
