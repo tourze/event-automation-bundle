@@ -20,6 +20,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 )]
 class ProcessEventCommand extends Command
 {
+    public const NAME = 'event-automation:process';
     public function __construct(
         private readonly EventConfigRepository $eventConfigRepository,
         private readonly EventService $eventService,
