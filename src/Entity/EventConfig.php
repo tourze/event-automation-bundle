@@ -14,8 +14,8 @@ use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
 use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
 
 #[ORM\Entity(repositoryClass: EventConfigRepository::class)]
-#[ORM\Table(name: 'ims_event_automation_config')]
-class EventConfig
+#[ORM\Table(name: 'ims_event_automation_config', options: ['comment' => '事件自动化配置'])]
+class EventConfig implements \Stringable
 {
     use TimestampableAware;
     #[ORM\Id]
@@ -23,16 +23,16 @@ class EventConfig
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
     private ?int $id = 0;
 
-    #[ORM\Column(type: 'string', length: 255, options: ['comment' => '事件名称'])]
+    #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => '事件名称'])]
     private string $name;
 
-    #[ORM\Column(type: 'string', length: 255, options: ['comment' => '事件标识符'])]
+    #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => '事件标识符'])]
     private string $identifier;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true, options: ['comment' => 'Cron 表达式,用于定时触发'])]
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => 'Cron 表达式,用于定时触发'])]
     private ?string $cronExpression = null;
 
-    #[ORM\Column(type: 'text', nullable: true, options: ['comment' => '触发条件SQL'])]
+    #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '触发条件SQL'])]
     private ?string $triggerSql = null;
 
     #[ORM\OneToMany(targetEntity: ContextConfig::class, mappedBy: 'eventConfig', cascade: ['persist', 'remove'], orphanRemoval: true)]
@@ -185,4 +185,10 @@ class EventConfig
     public function getUpdatedBy(): ?string
     {
         return $this->updatedBy;
-    }}
+    }
+
+    public function __toString(): string
+    {
+        return $this->name;
+    }
+}

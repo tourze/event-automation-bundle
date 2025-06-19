@@ -8,8 +8,8 @@ use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
 
 #[ORM\Entity]
-#[ORM\Table(name: 'ims_event_automation_trigger_log')]
-class TriggerLog
+#[ORM\Table(name: 'ims_event_automation_trigger_log', options: ['comment' => '事件触发日志'])]
+class TriggerLog implements \Stringable
 {
     use TimestampableAware;
     #[ORM\Id]
@@ -21,10 +21,10 @@ class TriggerLog
     #[ORM\JoinColumn(nullable: false)]
     private EventConfig $eventConfig;
 
-    #[ORM\Column(type: 'json', nullable: true, options: ['comment' => '触发时的上下文数据'])]
+    #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '触发时的上下文数据'])]
     private ?array $contextData = null;
 
-    #[ORM\Column(type: 'text', nullable: true, options: ['comment' => '执行结果'])]
+    #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '执行结果'])]
     private ?string $result = null;
 
     #[CreatedByColumn]
@@ -79,4 +79,10 @@ class TriggerLog
     public function getCreatedBy(): ?string
     {
         return $this->createdBy;
-    }}
+    }
+
+    public function __toString(): string
+    {
+        return sprintf('TriggerLog #%s for %s', $this->id, $this->eventConfig->getName());
+    }
+}

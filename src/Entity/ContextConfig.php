@@ -9,11 +9,10 @@ use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
 use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
 use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
-use Tourze\EasyAdmin\Attribute\Column\BoolColumn;
 
 #[ORM\Entity]
-#[ORM\Table(name: 'ims_event_automation_context')]
-class ContextConfig
+#[ORM\Table(name: 'ims_event_automation_context', options: ['comment' => '事件上下文配置'])]
+class ContextConfig implements \Stringable
 {
     use TimestampableAware;
     #[ORM\Id]
@@ -33,19 +32,18 @@ class ContextConfig
     #[ORM\JoinColumn(nullable: false)]
     private EventConfig $eventConfig;
 
-    #[ORM\Column(type: 'string', length: 255, options: ['comment' => '上下文变量名'])]
+    #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => '上下文变量名'])]
     private string $name;
 
-    #[ORM\Column(type: 'string', length: 255, options: ['comment' => '实体类名'])]
+    #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => '实体类名'])]
     private string $entityClass;
 
-    #[ORM\Column(type: 'text', options: ['comment' => '查询SQL'])]
+    #[ORM\Column(type: Types::TEXT, options: ['comment' => '查询SQL'])]
     private string $querySql;
 
-    #[ORM\Column(type: 'json', nullable: true, options: ['comment' => '查询参数配置'])]
+    #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '查询参数配置'])]
     private ?array $queryParams = null;
 
-    #[BoolColumn]
     #[IndexColumn]
     #[TrackColumn]
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '有效', 'default' => 0])]
@@ -145,4 +143,10 @@ class ContextConfig
     public function getUpdatedBy(): ?string
     {
         return $this->updatedBy;
-    }}
+    }
+
+    public function __toString(): string
+    {
+        return $this->name;
+    }
+}

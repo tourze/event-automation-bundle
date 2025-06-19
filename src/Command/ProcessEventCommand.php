@@ -15,7 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 #[AsCommand(
-    name: 'event-automation:process',
+    name: self::NAME,
     description: '处理自动化事件',
 )]
 class ProcessEventCommand extends Command
