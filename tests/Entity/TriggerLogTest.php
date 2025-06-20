@@ -38,12 +38,12 @@ class TriggerLogTest extends TestCase
         $this->assertSame($createdBy, $this->triggerLog->getCreatedBy());
 
         // 测试创建时间设置与获取
-        $createTime = new \DateTime();
+        $createTime = new \DateTimeImmutable();
         $this->triggerLog->setCreateTime($createTime);
         $this->assertSame($createTime, $this->triggerLog->getCreateTime());
 
         // 测试更新时间设置与获取
-        $updateTime = new \DateTime();
+        $updateTime = new \DateTimeImmutable();
         $this->triggerLog->setUpdateTime($updateTime);
         $this->assertSame($updateTime, $this->triggerLog->getUpdateTime());
     }

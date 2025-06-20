@@ -47,11 +47,11 @@ class EventConfigTest extends TestCase
         $eventConfig->setUpdatedBy($updatedBy);
         $this->assertSame($updatedBy, $eventConfig->getUpdatedBy());
 
-        $createTime = new \DateTime();
+        $createTime = new \DateTimeImmutable();
         $eventConfig->setCreateTime($createTime);
         $this->assertSame($createTime, $eventConfig->getCreateTime());
 
-        $updateTime = new \DateTime();
+        $updateTime = new \DateTimeImmutable();
         $eventConfig->setUpdateTime($updateTime);
         $this->assertSame($updateTime, $eventConfig->getUpdateTime());
     }

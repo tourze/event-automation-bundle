@@ -52,12 +52,12 @@ class ContextConfigTest extends TestCase
         $this->assertSame($updatedBy, $this->contextConfig->getUpdatedBy());
         
         // 测试创建时间设置与获取
-        $createTime = new \DateTime();
+        $createTime = new \DateTimeImmutable();
         $this->contextConfig->setCreateTime($createTime);
         $this->assertSame($createTime, $this->contextConfig->getCreateTime());
         
         // 测试更新时间设置与获取
-        $updateTime = new \DateTime();
+        $updateTime = new \DateTimeImmutable();
         $this->contextConfig->setUpdateTime($updateTime);
         $this->assertSame($updateTime, $this->contextConfig->getUpdateTime());
     }
