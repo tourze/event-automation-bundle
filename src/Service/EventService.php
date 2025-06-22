@@ -36,11 +36,12 @@ class EventService
      */
     public function calculateNextTriggerTime(EventConfig $eventConfig): ?\DateTimeImmutable
     {
-        if (!$eventConfig->getCronExpression()) {
+        $cronExpression = $eventConfig->getCronExpression();
+        if ($cronExpression === null || $cronExpression === '') {
             return null;
         }
 
-        $cron = new CronExpression($eventConfig->getCronExpression());
+        $cron = new CronExpression($cronExpression);
         return \DateTimeImmutable::createFromMutable($cron->getNextRunDate());
     }
 
@@ -60,12 +61,13 @@ class EventService
      */
     public function shouldTrigger(EventConfig $eventConfig): bool
     {
-        if (!$eventConfig->getTriggerSql()) {
+        $triggerSql = $eventConfig->getTriggerSql();
+        if ($triggerSql === null || $triggerSql === '') {
             return true;
         }
 
         try {
-            $result = $this->connection->fetchOne($eventConfig->getTriggerSql());
+            $result = $this->connection->fetchOne($triggerSql);
             return $result > 0;
         } catch (\Throwable) {
             return false;

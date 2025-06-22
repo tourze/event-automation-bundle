@@ -5,13 +5,15 @@ namespace EventAutomationBundle\Entity;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
-use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
+use Tourze\DoctrineUserBundle\Traits\CreatedByAware;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'ims_event_automation_trigger_log', options: ['comment' => '事件触发日志'])]
 class TriggerLog implements \Stringable
 {
     use TimestampableAware;
+    use CreatedByAware;
+    
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
@@ -26,10 +28,6 @@ class TriggerLog implements \Stringable
 
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '执行结果'])]
     private ?string $result = null;
-
-    #[CreatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '创建人'])]
-    private ?string $createdBy = null;
 
     public function getId(): ?int
     {
@@ -67,18 +65,6 @@ class TriggerLog implements \Stringable
     {
         $this->result = $result;
         return $this;
-    }
-
-    public function setCreatedBy(?string $createdBy): self
-    {
-        $this->createdBy = $createdBy;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?string
-    {
-        return $this->createdBy;
     }
 
     public function __toString(): string
