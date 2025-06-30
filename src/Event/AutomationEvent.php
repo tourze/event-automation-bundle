@@ -7,7 +7,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * 自动化事件
- * 
+ *
  * 用于携带事件配置和上下文数据
  */
 class AutomationEvent extends Event

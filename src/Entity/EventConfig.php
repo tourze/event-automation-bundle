@@ -137,7 +137,8 @@ class EventConfig implements \Stringable
 
     public function getLastTriggerLog(): ?TriggerLog
     {
-        return $this->triggerLogs->last() ?: null;
+        $lastLog = $this->triggerLogs->last();
+        return $lastLog !== false ? $lastLog : null;
     }
 
     public function isValid(): ?bool

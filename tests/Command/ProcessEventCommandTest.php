@@ -8,6 +8,7 @@ use EventAutomationBundle\Command\ProcessEventCommand;
 use EventAutomationBundle\Entity\ContextConfig;
 use EventAutomationBundle\Entity\EventConfig;
 use EventAutomationBundle\Event\AutomationEvent;
+use EventAutomationBundle\Exception\EventProcessingException;
 use EventAutomationBundle\Repository\EventConfigRepository;
 use EventAutomationBundle\Service\EventService;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -197,7 +198,7 @@ class ProcessEventCommandTest extends TestCase
             ->method('calculateNextTriggerTime')
             ->willReturnCallback(function (EventConfig $config) {
                 if ($config->getIdentifier() === 'error_event') {
-                    throw new \Exception('Test exception');
+                    throw EventProcessingException::forEvent('error_event', 'Test exception');
                 }
                 return null;
             });
