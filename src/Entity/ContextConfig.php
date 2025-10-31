@@ -4,6 +4,7 @@ namespace EventAutomationBundle\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
@@ -15,28 +16,37 @@ class ContextConfig implements \Stringable
 {
     use TimestampableAware;
     use BlameableAware;
-    
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
-    private ?int $id = 0;
+    private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: EventConfig::class)]
     #[ORM\JoinColumn(nullable: false)]
     private EventConfig $eventConfig;
 
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 255)]
     #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => '上下文变量名'])]
     private string $name;
 
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 255)]
     #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => '实体类名'])]
     private string $entityClass;
 
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 65535)]
     #[ORM\Column(type: Types::TEXT, options: ['comment' => '查询SQL'])]
     private string $querySql;
 
+    /** @var array<string, mixed>|null */
+    #[Assert\Type(type: 'array')]
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '查询参数配置'])]
     private ?array $queryParams = null;
 
+    #[Assert\Type(type: 'bool')]
     #[IndexColumn]
     #[TrackColumn]
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '有效', 'default' => 0])]
@@ -52,10 +62,9 @@ class ContextConfig implements \Stringable
         return $this->eventConfig;
     }
 
-    public function setEventConfig(EventConfig $eventConfig): self
+    public function setEventConfig(EventConfig $eventConfig): void
     {
         $this->eventConfig = $eventConfig;
-        return $this;
     }
 
     public function getName(): string
@@ -63,10 +72,9 @@ class ContextConfig implements \Stringable
         return $this->name;
     }
 
-    public function setName(string $name): self
+    public function setName(string $name): void
     {
         $this->name = $name;
-        return $this;
     }
 
     public function getEntityClass(): string
@@ -74,10 +82,9 @@ class ContextConfig implements \Stringable
         return $this->entityClass;
     }
 
-    public function setEntityClass(string $entityClass): self
+    public function setEntityClass(string $entityClass): void
     {
         $this->entityClass = $entityClass;
-        return $this;
     }
 
     public function getQuerySql(): string
@@ -85,21 +92,25 @@ class ContextConfig implements \Stringable
         return $this->querySql;
     }
 
-    public function setQuerySql(string $querySql): self
+    public function setQuerySql(string $querySql): void
     {
         $this->querySql = $querySql;
-        return $this;
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function getQueryParams(): ?array
     {
         return $this->queryParams;
     }
 
-    public function setQueryParams(?array $queryParams): self
+    /**
+     * @param array<string, mixed>|null $queryParams
+     */
+    public function setQueryParams(?array $queryParams): void
     {
         $this->queryParams = $queryParams;
-        return $this;
     }
 
     public function isValid(): ?bool
@@ -107,11 +118,9 @@ class ContextConfig implements \Stringable
         return $this->valid;
     }
 
-    public function setValid(?bool $valid): self
+    public function setValid(?bool $valid): void
     {
         $this->valid = $valid;
-
-        return $this;
     }
 
     public function __toString(): string

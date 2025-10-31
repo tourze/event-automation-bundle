@@ -16,7 +16,7 @@ use EventAutomationBundle\Entity\EventConfig;
 class EventService
 {
     public function __construct(
-        private readonly Connection $connection
+        private readonly Connection $connection,
     ) {
     }
 
@@ -27,9 +27,10 @@ class EventService
      * 如果事件没有配置 Cron 表达式,返回 null
      *
      * @param EventConfig $eventConfig 事件配置
+     *
      * @return \DateTimeImmutable|null 下次触发时间,如果没有配置 Cron 表达式则返回 null
      *
-     * @example
+     * 示例:
      * // 每天凌晨1点执行
      * $config->setCronExpression('0 1 * * *');
      * $service->calculateNextTriggerTime($config); // 返回下一个凌晨1点的时间
@@ -37,11 +38,12 @@ class EventService
     public function calculateNextTriggerTime(EventConfig $eventConfig): ?\DateTimeImmutable
     {
         $cronExpression = $eventConfig->getCronExpression();
-        if ($cronExpression === null || $cronExpression === '') {
+        if (null === $cronExpression || '' === $cronExpression) {
             return null;
         }
 
         $cron = new CronExpression($cronExpression);
+
         return \DateTimeImmutable::createFromMutable($cron->getNextRunDate());
     }
 
@@ -52,9 +54,10 @@ class EventService
      * 如果事件没有配置触发条件 SQL,默认返回 true
      *
      * @param EventConfig $eventConfig 事件配置
+     *
      * @return bool 是否满足触发条件
      *
-     * @example
+     * 示例:
      * // 检查是否有待处理的订单
      * $config->setTriggerSql('SELECT COUNT(*) FROM orders WHERE status = "pending"');
      * $service->shouldTrigger($config); // 如果有待处理订单返回 true
@@ -62,12 +65,13 @@ class EventService
     public function shouldTrigger(EventConfig $eventConfig): bool
     {
         $triggerSql = $eventConfig->getTriggerSql();
-        if ($triggerSql === null || $triggerSql === '') {
+        if (null === $triggerSql || '' === $triggerSql) {
             return true;
         }
 
         try {
             $result = $this->connection->fetchOne($triggerSql);
+
             return $result > 0;
         } catch (\Throwable) {
             return false;

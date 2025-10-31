@@ -3,14 +3,20 @@
 namespace EventAutomationBundle\Tests\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use EventAutomationBundle\Entity\ContextConfig;
 use EventAutomationBundle\Entity\EventConfig;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
+use Tourze\PHPUnitDoctrineEntity\AbstractEntityTestCase;
 
-class EventConfigTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(EventConfig::class)]
+final class EventConfigTest extends AbstractEntityTestCase
 {
-    public function testConstruct_shouldInitializeCollections(): void
+    public function testConstructShouldInitializeCollections(): void
     {
         $eventConfig = new EventConfig();
 
@@ -20,7 +26,7 @@ class EventConfigTest extends TestCase
         $this->assertCount(0, $eventConfig->getTriggerLogs());
     }
 
-    public function testGettersAndSetters_shouldWorkCorrectly(): void
+    public function testGettersAndSettersShouldWorkCorrectly(): void
     {
         $eventConfig = new EventConfig();
 
@@ -56,7 +62,7 @@ class EventConfigTest extends TestCase
         $this->assertSame($updateTime, $eventConfig->getUpdateTime());
     }
 
-    public function testAddContextConfig_shouldAddToCollection(): void
+    public function testAddContextConfigShouldAddToCollection(): void
     {
         $eventConfig = new EventConfig();
         $contextConfig = new ContextConfig();
@@ -67,7 +73,7 @@ class EventConfigTest extends TestCase
         $this->assertSame($eventConfig, $contextConfig->getEventConfig());
     }
 
-    public function testAddContextConfig_shouldNotAddDuplicate(): void
+    public function testAddContextConfigShouldNotAddDuplicate(): void
     {
         $eventConfig = new EventConfig();
         $contextConfig = new ContextConfig();
@@ -78,7 +84,7 @@ class EventConfigTest extends TestCase
         $this->assertCount(1, $eventConfig->getContextConfigs());
     }
 
-    public function testRemoveContextConfig_shouldRemoveFromCollection(): void
+    public function testRemoveContextConfigShouldRemoveFromCollection(): void
     {
         $eventConfig = new EventConfig();
         $contextConfig = new ContextConfig();
@@ -89,10 +95,11 @@ class EventConfigTest extends TestCase
         $this->assertCount(1, $eventConfig->getContextConfigs());
 
         // 直接从集合中移除，而不调用实体的removeContextConfig方法
-        $reflection = new ReflectionClass($eventConfig);
+        $reflection = new \ReflectionClass($eventConfig);
         $property = $reflection->getProperty('contextConfigs');
         $property->setAccessible(true);
         $contextConfigs = $property->getValue($eventConfig);
+        $this->assertInstanceOf(Collection::class, $contextConfigs);
         $contextConfigs->removeElement($contextConfig);
 
         $this->assertCount(0, $eventConfig->getContextConfigs());
@@ -101,7 +108,7 @@ class EventConfigTest extends TestCase
         $newEventConfig->addContextConfig($contextConfig);
     }
 
-    public function testAddContextConfig_shouldUpdateAssociationButNotAutoRemoveFromOtherCollections(): void
+    public function testAddContextConfigShouldUpdateAssociationButNotAutoRemoveFromOtherCollections(): void
     {
         $eventConfig1 = new EventConfig();
         $eventConfig2 = new EventConfig();
@@ -125,10 +132,36 @@ class EventConfigTest extends TestCase
         // Doctrine会处理集合之间的一致性，确保一个ContextConfig只属于一个EventConfig
     }
 
-    public function testGetLastTriggerLog_shouldReturnNullWhenEmpty(): void
+    public function testGetLastTriggerLogShouldReturnNullWhenEmpty(): void
     {
         $eventConfig = new EventConfig();
 
         $this->assertNull($eventConfig->getLastTriggerLog());
+    }
+
+    /**
+     * 创建被测实体的一个实例.
+     */
+    protected function createEntity(): object
+    {
+        return new EventConfig();
+    }
+
+    /**
+     * 提供属性及其样本值的 Data Provider.
+     *
+     * @return iterable<string, array{string, mixed}>
+     */
+    public static function propertiesProvider(): iterable
+    {
+        yield 'name' => ['name', '测试事件'];
+        yield 'identifier' => ['identifier', 'test_event'];
+        yield 'cronExpression' => ['cronExpression', '0 0 * * *'];
+        yield 'triggerSql' => ['triggerSql', 'SELECT COUNT(*) FROM users'];
+        yield 'valid' => ['valid', true];
+        yield 'createdBy' => ['createdBy', 'admin'];
+        yield 'updatedBy' => ['updatedBy', 'system'];
+        yield 'createTime' => ['createTime', new \DateTimeImmutable()];
+        yield 'updateTime' => ['updateTime', new \DateTimeImmutable()];
     }
 }

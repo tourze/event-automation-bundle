@@ -13,12 +13,12 @@ use Symfony\Contracts\EventDispatcher\Event;
 class AutomationEvent extends Event
 {
     /**
-     * @param EventConfig $config 事件配置
+     * @param EventConfig          $config  事件配置
      * @param array<string, mixed> $context 上下文数据,key 是变量名,value 是具体的数据
      */
     public function __construct(
         private readonly EventConfig $config,
-        private readonly array $context = []
+        private readonly array $context = [],
     ) {
     }
 

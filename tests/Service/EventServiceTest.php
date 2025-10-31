@@ -5,117 +5,140 @@ namespace EventAutomationBundle\Tests\Service;
 use Doctrine\DBAL\Connection;
 use EventAutomationBundle\Entity\EventConfig;
 use EventAutomationBundle\Service\EventService;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-class EventServiceTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(EventService::class)]
+final class EventServiceTest extends TestCase
 {
-    private Connection $connection;
-    private EventService $eventService;
-    
-    protected function setUp(): void
+    public function testCalculateNextTriggerTimeWithValidCronExpressionShouldReturnNextDate(): void
     {
-        $this->connection = $this->createMock(Connection::class);
-        $this->eventService = new EventService($this->connection);
-    }
-    
-    public function testCalculateNextTriggerTime_withValidCronExpression_shouldReturnNextDate(): void
-    {
+        $connection = $this->createMock(Connection::class);
+        $eventService = new EventService($connection);
+
         $eventConfig = new EventConfig();
         $eventConfig->setCronExpression('0 0 * * *'); // 每天午夜
-        
-        $result = $this->eventService->calculateNextTriggerTime($eventConfig);
-        
+
+        $result = $eventService->calculateNextTriggerTime($eventConfig);
+
         $this->assertInstanceOf(\DateTimeImmutable::class, $result);
-        
+
         // 验证结果是未来的日期
         $this->assertGreaterThanOrEqual(new \DateTimeImmutable(), $result);
-        
+
         // 验证结果是午夜时间
         $this->assertSame('00:00:00', $result->format('H:i:s'));
     }
-    
-    public function testCalculateNextTriggerTime_withNullCronExpression_shouldReturnNull(): void
+
+    public function testCalculateNextTriggerTimeWithNullCronExpressionShouldReturnNull(): void
     {
+        $connection = $this->createMock(Connection::class);
+        $eventService = new EventService($connection);
+
         $eventConfig = new EventConfig();
         $eventConfig->setCronExpression(null);
-        
-        $result = $this->eventService->calculateNextTriggerTime($eventConfig);
-        
+
+        $result = $eventService->calculateNextTriggerTime($eventConfig);
+
         $this->assertNull($result);
     }
-    
-    public function testCalculateNextTriggerTime_withEmptyCronExpression_shouldReturnNull(): void
+
+    public function testCalculateNextTriggerTimeWithEmptyCronExpressionShouldReturnNull(): void
     {
+        $connection = $this->createMock(Connection::class);
+        $eventService = new EventService($connection);
+
         $eventConfig = new EventConfig();
         $eventConfig->setCronExpression('');
-        
-        $result = $this->eventService->calculateNextTriggerTime($eventConfig);
-        
+
+        $result = $eventService->calculateNextTriggerTime($eventConfig);
+
         $this->assertNull($result);
     }
-    
-    public function testShouldTrigger_withNullTriggerSql_shouldReturnTrue(): void
+
+    public function testShouldTriggerWithNullTriggerSqlShouldReturnTrue(): void
     {
+        $connection = $this->createMock(Connection::class);
+        $eventService = new EventService($connection);
+
         $eventConfig = new EventConfig();
         $eventConfig->setTriggerSql(null);
-        
-        $result = $this->eventService->shouldTrigger($eventConfig);
-        
+
+        $result = $eventService->shouldTrigger($eventConfig);
+
         $this->assertTrue($result);
     }
-    
-    public function testShouldTrigger_withEmptyTriggerSql_shouldReturnTrue(): void
+
+    public function testShouldTriggerWithEmptyTriggerSqlShouldReturnTrue(): void
     {
+        $connection = $this->createMock(Connection::class);
+        $eventService = new EventService($connection);
+
         $eventConfig = new EventConfig();
         $eventConfig->setTriggerSql('');
-        
-        $result = $this->eventService->shouldTrigger($eventConfig);
-        
+
+        $result = $eventService->shouldTrigger($eventConfig);
+
         $this->assertTrue($result);
     }
-    
-    public function testShouldTrigger_withPositiveResult_shouldReturnTrue(): void
+
+    public function testShouldTriggerWithPositiveResultShouldReturnTrue(): void
     {
+        $connection = $this->createMock(Connection::class);
+        $eventService = new EventService($connection);
+
         $eventConfig = new EventConfig();
         $eventConfig->setTriggerSql('SELECT COUNT(*) FROM users');
-        
-        $this->connection->expects($this->once())
+
+        $connection->expects($this->once())
             ->method('fetchOne')
             ->with('SELECT COUNT(*) FROM users')
-            ->willReturn(5);
-        
-        $result = $this->eventService->shouldTrigger($eventConfig);
-        
+            ->willReturn(5)
+        ;
+
+        $result = $eventService->shouldTrigger($eventConfig);
+
         $this->assertTrue($result);
     }
-    
-    public function testShouldTrigger_withZeroResult_shouldReturnFalse(): void
+
+    public function testShouldTriggerWithZeroResultShouldReturnFalse(): void
     {
+        $connection = $this->createMock(Connection::class);
+        $eventService = new EventService($connection);
+
         $eventConfig = new EventConfig();
         $eventConfig->setTriggerSql('SELECT COUNT(*) FROM users WHERE 1=0');
-        
-        $this->connection->expects($this->once())
+
+        $connection->expects($this->once())
             ->method('fetchOne')
             ->with('SELECT COUNT(*) FROM users WHERE 1=0')
-            ->willReturn(0);
-        
-        $result = $this->eventService->shouldTrigger($eventConfig);
-        
+            ->willReturn(0)
+        ;
+
+        $result = $eventService->shouldTrigger($eventConfig);
+
         $this->assertFalse($result);
     }
-    
-    public function testShouldTrigger_withDatabaseError_shouldReturnFalse(): void
+
+    public function testShouldTriggerWithDatabaseErrorShouldReturnFalse(): void
     {
+        $connection = $this->createMock(Connection::class);
+        $eventService = new EventService($connection);
+
         $eventConfig = new EventConfig();
         $eventConfig->setTriggerSql('INVALID SQL');
-        
-        $this->connection->expects($this->once())
+
+        $connection->expects($this->once())
             ->method('fetchOne')
             ->with('INVALID SQL')
-            ->willThrowException(new \Exception('Database error'));
-        
-        $result = $this->eventService->shouldTrigger($eventConfig);
-        
+            ->willThrowException(new \Exception('Database error'))
+        ;
+
+        $result = $eventService->shouldTrigger($eventConfig);
+
         $this->assertFalse($result);
     }
-} 
+}

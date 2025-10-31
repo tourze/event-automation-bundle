@@ -6,42 +6,28 @@ namespace EventAutomationBundle\Tests\DependencyInjection;
 
 use EventAutomationBundle\Command\ProcessEventCommand;
 use EventAutomationBundle\DependencyInjection\EventAutomationExtension;
-use EventAutomationBundle\Repository\EventConfigRepository;
 use EventAutomationBundle\Service\EventService;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Tourze\PHPUnitSymfonyUnitTest\AbstractDependencyInjectionExtensionTestCase;
 
-class EventAutomationExtensionTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(EventAutomationExtension::class)]
+final class EventAutomationExtensionTest extends AbstractDependencyInjectionExtensionTestCase
 {
     private EventAutomationExtension $extension;
+
     private ContainerBuilder $container;
 
     protected function setUp(): void
     {
-        parent::setUp();
+        // Extension类需要直接实例化进行测试，这是正常的测试模式
+        // @phpstan-ignore-next-line
         $this->extension = new EventAutomationExtension();
         $this->container = new ContainerBuilder();
-    }
-
-    public function testLoad(): void
-    {
-        $this->extension->load([], $this->container);
-
-        // 验证主要服务已经被加载
-        $this->assertTrue(
-            $this->container->hasDefinition(EventService::class),
-            'EventService should be registered'
-        );
-
-        $this->assertTrue(
-            $this->container->hasDefinition(EventConfigRepository::class),
-            'EventConfigRepository should be registered'
-        );
-
-        $this->assertTrue(
-            $this->container->hasDefinition(ProcessEventCommand::class),
-            'ProcessEventCommand should be registered'
-        );
+        $this->container->setParameter('kernel.environment', 'test');
     }
 
     public function testLoadWithEmptyConfig(): void

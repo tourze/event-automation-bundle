@@ -4,53 +4,88 @@ namespace EventAutomationBundle\Tests\Event;
 
 use EventAutomationBundle\Entity\EventConfig;
 use EventAutomationBundle\Event\AutomationEvent;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitSymfonyUnitTest\AbstractEventTestCase;
 
-class AutomationEventTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(AutomationEvent::class)]
+final class AutomationEventTest extends AbstractEventTestCase
 {
-    private EventConfig $eventConfig;
-    private array $context;
-    private AutomationEvent $event;
-    
-    protected function setUp(): void
+    public function testGetConfigShouldReturnConfig(): void
     {
-        $this->eventConfig = new EventConfig();
-        $this->eventConfig->setIdentifier('test_event');
-        $this->eventConfig->setName('测试事件');
-        
-        $this->context = [
+        $eventConfig = new EventConfig();
+        $eventConfig->setIdentifier('test_event');
+        $eventConfig->setName('测试事件');
+
+        $context = [
             'user' => ['id' => 1, 'name' => 'John Doe'],
-            'order' => ['id' => 123, 'total' => 99.99]
+            'order' => ['id' => 123, 'total' => 99.99],
         ];
-        
-        $this->event = new AutomationEvent($this->eventConfig, $this->context);
+
+        $event = new AutomationEvent($eventConfig, $context);
+
+        $this->assertSame($eventConfig, $event->getConfig());
     }
-    
-    public function testGetConfig_shouldReturnConfig(): void
+
+    public function testGetContextShouldReturnContext(): void
     {
-        $this->assertSame($this->eventConfig, $this->event->getConfig());
+        $eventConfig = new EventConfig();
+        $eventConfig->setIdentifier('test_event');
+        $eventConfig->setName('测试事件');
+
+        $context = [
+            'user' => ['id' => 1, 'name' => 'John Doe'],
+            'order' => ['id' => 123, 'total' => 99.99],
+        ];
+
+        $event = new AutomationEvent($eventConfig, $context);
+
+        $this->assertSame($context, $event->getContext());
     }
-    
-    public function testGetContext_shouldReturnContext(): void
+
+    public function testGetNameShouldReturnEventIdentifier(): void
     {
-        $this->assertSame($this->context, $this->event->getContext());
+        $eventConfig = new EventConfig();
+        $eventConfig->setIdentifier('test_event');
+        $eventConfig->setName('测试事件');
+
+        $context = [
+            'user' => ['id' => 1, 'name' => 'John Doe'],
+            'order' => ['id' => 123, 'total' => 99.99],
+        ];
+
+        $event = new AutomationEvent($eventConfig, $context);
+
+        $this->assertSame('test_event', $event->getName());
     }
-    
-    public function testGetName_shouldReturnEventIdentifier(): void
+
+    public function testConstructWithEmptyContextShouldSetEmptyArray(): void
     {
-        $this->assertSame('test_event', $this->event->getName());
-    }
-    
-    public function testConstructWithEmptyContext_shouldSetEmptyArray(): void
-    {
-        $event = new AutomationEvent($this->eventConfig);
+        $eventConfig = new EventConfig();
+        $eventConfig->setIdentifier('test_event');
+        $eventConfig->setName('测试事件');
+
+        $event = new AutomationEvent($eventConfig);
         $this->assertSame([], $event->getContext());
     }
-    
-    public function testGetName_shouldReturnCorrectEventNameWhenIdentifierChanged(): void
+
+    public function testGetNameShouldReturnCorrectEventNameWhenIdentifierChanged(): void
     {
         // 测试当标识符更改时，getName也会返回更新后的值
-        $this->eventConfig->setIdentifier('updated_event');
-        $this->assertSame('updated_event', $this->event->getName());
+        $eventConfig = new EventConfig();
+        $eventConfig->setIdentifier('test_event');
+        $eventConfig->setName('测试事件');
+
+        $context = [
+            'user' => ['id' => 1, 'name' => 'John Doe'],
+            'order' => ['id' => 123, 'total' => 99.99],
+        ];
+
+        $event = new AutomationEvent($eventConfig, $context);
+
+        $eventConfig->setIdentifier('updated_event');
+        $this->assertSame('updated_event', $event->getName());
     }
-} 
+}

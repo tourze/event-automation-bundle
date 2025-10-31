@@ -1,74 +1,103 @@
 <?php
 
-declare(strict_types=1);
-
 namespace EventAutomationBundle\Tests\Repository;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use EventAutomationBundle\Entity\EventConfig;
 use EventAutomationBundle\Repository\EventConfigRepository;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use Tourze\PHPUnitSymfonyKernelTest\AbstractRepositoryTestCase;
 
-class EventConfigRepositoryTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(EventConfigRepository::class)]
+#[RunTestsInSeparateProcesses]
+final class EventConfigRepositoryTest extends AbstractRepositoryTestCase
 {
     private EventConfigRepository $repository;
-    /** @var ManagerRegistry&MockObject */
-    private ManagerRegistry $registry;
-    /** @var EntityManagerInterface&MockObject */
-    private EntityManagerInterface $entityManager;
 
-    protected function setUp(): void
+    protected function onSetUp(): void
     {
-        parent::setUp();
-
-        $this->entityManager = $this->createMock(EntityManagerInterface::class);
-        $this->registry = $this->createMock(ManagerRegistry::class);
-
-        // 设置 ManagerRegistry 的模拟行为
-        $this->registry
-            ->expects($this->any())
-            ->method('getManagerForClass')
-            ->with(EventConfig::class)
-            ->willReturn($this->entityManager);
-
-        // 设置 EntityManager 的模拟行为
-        $classMetadata = new ClassMetadata(EventConfig::class);
-        $this->entityManager
-            ->expects($this->any())
-            ->method('getClassMetadata')
-            ->with(EventConfig::class)
-            ->willReturn($classMetadata);
-
-        $this->repository = new EventConfigRepository($this->registry);
+        $this->repository = self::getService(EventConfigRepository::class);
     }
 
-    public function testConstruct(): void
+    public function testSaveMethodShouldPersistEntity(): void
     {
-        $this->assertInstanceOf(EventConfigRepository::class, $this->repository);
+        $entity = new EventConfig();
+        $entity->setName('Save Test Event');
+        $entity->setIdentifier('save-test-event');
+
+        $this->repository->save($entity);
+
+        $this->assertNotNull($entity->getId());
+        $savedEntity = $this->repository->find($entity->getId());
+        $this->assertInstanceOf(EventConfig::class, $savedEntity);
+        $this->assertEquals('Save Test Event', $savedEntity->getName());
     }
 
-    public function testInheritance(): void
+    public function testSaveMethodWithoutFlushShouldNotPersistImmediately(): void
     {
-        $this->assertInstanceOf(
-            '\Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository',
-            $this->repository
-        );
+        $entity = new EventConfig();
+        $entity->setName('No Flush Test Event');
+        $entity->setIdentifier('no-flush-test-event');
+
+        $this->repository->save($entity, false);
+        self::getEntityManager()->flush();
+
+        $this->assertNotNull($entity->getId());
     }
 
-    public function testGetClassName(): void
+    public function testRemoveMethodShouldDeleteEntity(): void
     {
-        $this->assertEquals(EventConfig::class, $this->repository->getClassName());
+        $entity = new EventConfig();
+        $entity->setName('Remove Test Event');
+        $entity->setIdentifier('remove-test-event');
+        $this->repository->save($entity);
+
+        $id = $entity->getId();
+        $this->repository->remove($entity);
+
+        $result = $this->repository->find($id);
+        $this->assertNull($result);
     }
 
-    public function testRepositoryCanBeInstantiated(): void
+    public function testRemoveMethodWithoutFlushShouldNotDeleteImmediately(): void
     {
-        // 验证仓库可以正确实例化
-        $this->assertNotNull($this->repository);
-        
-        // 验证仓库是为正确的实体类创建的
-        $this->assertEquals(EventConfig::class, $this->repository->getClassName());
+        $entity = new EventConfig();
+        $entity->setName('No Flush Remove Test Event');
+        $entity->setIdentifier('no-flush-remove-test-event');
+        $this->repository->save($entity);
+
+        $id = $entity->getId();
+        $this->repository->remove($entity, false);
+
+        $result = $this->repository->find($id);
+        $this->assertInstanceOf(EventConfig::class, $result);
+
+        self::getEntityManager()->flush();
+        $result = $this->repository->find($id);
+        $this->assertNull($result);
+    }
+
+    /**
+     * @return EventConfigRepository
+     */
+    protected function getRepository(): ServiceEntityRepository
+    {
+        return $this->repository;
+    }
+
+    protected function createNewEntity(): object
+    {
+        $entity = new EventConfig();
+        $entity->setName('测试事件_' . time());
+        $entity->setIdentifier('test_event_' . time() . '_' . random_int(1000, 9999));
+        $entity->setCronExpression('0 */5 * * * *');
+        $entity->setTriggerSql('SELECT COUNT(*) FROM test_table');
+        $entity->setValid(true);
+
+        return $entity;
     }
 }

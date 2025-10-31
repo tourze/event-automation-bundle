@@ -1,0 +1,5 @@
+services:
+  EventAutomationBundle\DataFixtures\:
+    resource: '../../DataFixtures'
+    autoconfigure: true
+    public: true

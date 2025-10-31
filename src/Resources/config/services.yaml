@@ -6,6 +6,8 @@ services:
 
   EventAutomationBundle\Command\:
     resource: '../../Command/'
+  EventAutomationBundle\Controller\:
+    resource: '../../Controller/'
   EventAutomationBundle\Repository\:
     resource: '../../Repository/'
   EventAutomationBundle\Service\:

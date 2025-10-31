@@ -1,67 +1,48 @@
 # EventAutomationBundle
 
-EventAutomationBundle 是一个基于 Symfony 的事件自动化处理系统，它允许通过配置的方式定义事件触发条件和处理逻辑。
+[English](README.md) | [中文](README.zh-CN.md)
 
-## 依赖
+[![Latest Version](https://img.shields.io/packagist/v/tourze/event-automation-bundle.svg?style=flat-square)](https://packagist.org/packages/tourze/event-automation-bundle)
+[![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-blue.svg?style=flat-square)](https://packagist.org/packages/tourze/event-automation-bundle)
+[![License](https://img.shields.io/packagist/l/tourze/event-automation-bundle.svg?style=flat-square)](https://packagist.org/packages/tourze/event-automation-bundle)
+[![Total Downloads](https://img.shields.io/packagist/dt/tourze/event-automation-bundle.svg?style=flat-square)](https://packagist.org/packages/tourze/event-automation-bundle)
+[![Code Coverage](https://img.shields.io/codecov/c/github/tourze/php-monorepo/master?style=flat-square)](https://codecov.io/gh/tourze/php-monorepo)
 
-本 Bundle 依赖以下 Bundle：
-- AmisBundle：提供后台管理界面支持
+A Symfony bundle that provides automated event processing system with configurable triggers and context data collection.
 
-## 核心功能
+## Features
 
-### 1. 事件配置管理
-- 支持通过 Cron 表达式定义定时触发
-- 支持通过 SQL 定义触发条件
-- 灵活的上下文数据收集配置
-- 完整的事件触发日志记录
+- **Cron-based scheduling**: Define events using standard cron expressions
+- **SQL-based triggers**: Conditional event triggers based on database queries  
+- **Context data collection**: Flexible data gathering with parameterized queries
+- **Event logging**: Complete audit trail of all event executions
+- **Symfony integration**: Native integration with Symfony EventDispatcher
+- **Multiple trigger types**: Support for both time-based and condition-based triggers
 
-### 2. 上下文数据管理
-- 支持多个上下文数据源配置
-- SQL 查询参数配置
-- 实体关联支持
-- 自动数据收集
+## Requirements
 
-### 3. 事件处理
-- 基于 Symfony EventDispatcher
-- 支持异步处理
-- 错误处理和日志记录
-- 事件执行状态追踪
+- PHP 8.1 or higher
+- Symfony 7.3 or higher
+- Doctrine ORM 3.0 or higher
 
-## 实体
+## Installation
 
-### EventConfig 实体
-事件配置实体，包含以下主要字段：
-- `name`: 事件名称
-- `identifier`: 事件标识符
-- `cronExpression`: Cron 表达式，用于定时触发
-- `triggerSql`: 触发条件 SQL
-- `contextConfigs`: 关联的上下文配置
-- `triggerLogs`: 触发日志记录
+```bash
+composer require tourze/event-automation-bundle
+```
 
-### ContextConfig 实体
-上下文配置实体，包含以下主要字段：
-- `name`: 上下文变量名
-- `entityClass`: 实体类名
-- `querySql`: 查询 SQL
-- `queryParams`: 查询参数配置
+## Quick Start
 
-### TriggerLog 实体
-触发日志实体，包含以下主要字段：
-- `contextData`: 触发时的上下文数据
-- `result`: 执行结果
-
-## 使用示例
-
-### 1. 创建事件配置
+### 1. Create Event Configuration
 
 ```php
 use EventAutomationBundle\Entity\EventConfig;
 use EventAutomationBundle\Entity\ContextConfig;
 
 $eventConfig = new EventConfig();
-$eventConfig->setName('订单超时检查')
+$eventConfig->setName('Order Timeout Check')
     ->setIdentifier('order_timeout_check')
-    ->setCronExpression('0 * * * *')  // 每小时执行一次
+    ->setCronExpression('0 * * * *')  // Run every hour
     ->setTriggerSql('SELECT COUNT(*) FROM orders WHERE status = "pending" AND created_at < DATE_SUB(NOW(), INTERVAL 24 HOUR)');
 
 $contextConfig = new ContextConfig();
@@ -75,7 +56,7 @@ $entityManager->persist($contextConfig);
 $entityManager->flush();
 ```
 
-### 2. 创建事件监听器
+### 2. Create Event Listener
 
 ```php
 use EventAutomationBundle\Event\AutomationEvent;
@@ -95,12 +76,24 @@ class OrderTimeoutEventSubscriber implements EventSubscriberInterface
         $context = $event->getContext();
         $timeoutOrders = $context['timeout_orders'] ?? [];
         
-        // 处理超时订单...
+        // Handle timeout orders...
+        foreach ($timeoutOrders as $order) {
+            // Process order timeout logic
+        }
     }
 }
 ```
 
-### 3. 手动触发事件
+### 3. Process Events
+
+```bash
+# Run automation events
+php bin/console event-automation:process
+```
+
+## Advanced Usage
+
+### Manual Event Triggering
 
 ```php
 use EventAutomationBundle\Event\AutomationEvent;
@@ -109,17 +102,52 @@ $event = new AutomationEvent($eventConfig, ['manual_trigger' => true]);
 $eventDispatcher->dispatch($event, $event->getName());
 ```
 
-## 命令行工具
+### Complex Context Data
 
-处理自动化事件的命令：
-```bash
-php bin/console event-automation:process
+```php
+$contextConfig = new ContextConfig();
+$contextConfig->setName('user_stats')
+    ->setEntityClass('App\\Entity\\User')
+    ->setQuerySql('SELECT u.* FROM users u WHERE u.last_login < :cutoff_date')
+    ->setQueryParams(['cutoff_date' => '30 days ago'])
+    ->setEventConfig($eventConfig);
 ```
 
-## 注意事项
+## Entities
 
-1. SQL 触发条件应该返回数字结果，大于 0 表示满足触发条件
-2. Cron 表达式需要符合标准格式
-3. 上下文查询性能要注意优化，避免大量数据查询
-4. 事件处理器要保证幂等性，同一事件可能被多次触发
-5. 建议配置监控，及时发现事件处理异常
+### EventConfig
+Main configuration entity with:
+- `name`: Event display name
+- `identifier`: Unique event identifier
+- `cronExpression`: Cron scheduling expression
+- `triggerSql`: SQL condition for triggering
+- `contextConfigs`: Associated context configurations
+- `triggerLogs`: Execution history
+
+### ContextConfig
+Context data configuration with:
+- `name`: Context variable name
+- `entityClass`: Target entity class
+- `querySql`: Data collection query
+- `queryParams`: Query parameter configuration
+
+### TriggerLog
+Execution log with:
+- `contextData`: Captured context data
+- `result`: Execution result/status
+
+## Best Practices
+
+1. **SQL Performance**: Ensure trigger SQL queries are optimized and use proper indexes
+2. **Cron Expressions**: Use standard cron format for scheduling
+3. **Idempotency**: Design event handlers to be idempotent for repeated executions
+4. **Error Handling**: Implement proper error handling in event subscribers
+5. **Monitoring**: Set up monitoring for event execution failures
+
+## Contributing
+
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+## License
+
+The MIT License (MIT). Please see [License File](LICENSE) for more information.

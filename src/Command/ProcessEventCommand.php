@@ -7,6 +7,7 @@ use EventAutomationBundle\Entity\EventConfig;
 use EventAutomationBundle\Event\AutomationEvent;
 use EventAutomationBundle\Repository\EventConfigRepository;
 use EventAutomationBundle\Service\EventService;
+use Monolog\Attribute\WithMonologChannel;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -18,21 +19,24 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
     name: self::NAME,
     description: '处理自动化事件',
 )]
+#[WithMonologChannel(channel: 'event_automation')]
 class ProcessEventCommand extends Command
 {
     public const NAME = 'event-automation:process';
+
     public function __construct(
         private readonly EventConfigRepository $eventConfigRepository,
         private readonly EventService $eventService,
         private readonly EventDispatcherInterface $eventDispatcher,
         private readonly Connection $connection,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
     ) {
         parent::__construct();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        /** @var EventConfig[] $configs */
         $configs = $this->eventConfigRepository->findBy(['valid' => true]);
 
         foreach ($configs as $config) {
@@ -54,7 +58,7 @@ class ProcessEventCommand extends Command
     {
         // 1. 检查是否到达触发时间
         $nextTriggerTime = $this->eventService->calculateNextTriggerTime($config);
-        if ($nextTriggerTime === null || $nextTriggerTime > new \DateTimeImmutable()) {
+        if (null === $nextTriggerTime || $nextTriggerTime > new \DateTimeImmutable()) {
             return;
         }
 
@@ -68,7 +72,7 @@ class ProcessEventCommand extends Command
 
         // 4. 分发事件
         $event = new AutomationEvent($config, $context);
-        $this->eventDispatcher->dispatch($event, $event->getName());
+        $this->eventDispatcher->dispatch($event);
     }
 
     /**
@@ -81,7 +85,7 @@ class ProcessEventCommand extends Command
         $context = [];
 
         foreach ($config->getContextConfigs() as $contextConfig) {
-            if (!$contextConfig->isValid()) {
+            if (true !== $contextConfig->isValid()) {
                 continue;
             }
 
@@ -93,7 +97,7 @@ class ProcessEventCommand extends Command
                 );
                 $result = $stmt->fetchAssociative();
 
-                if ($result) {
+                if (false !== $result) {
                     $context[$contextConfig->getName()] = $result;
                 }
             } catch (\Throwable $e) {
