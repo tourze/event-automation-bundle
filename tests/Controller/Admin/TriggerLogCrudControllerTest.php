@@ -46,8 +46,7 @@ final class TriggerLogCrudControllerTest extends AbstractEasyAdminControllerTest
 
     public function testIndexPage(): void
     {
-        $client = self::createClientWithDatabase();
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
         $crawler = $client->request('GET', '/admin');
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
 
@@ -61,8 +60,7 @@ final class TriggerLogCrudControllerTest extends AbstractEasyAdminControllerTest
 
     public function testCreateTriggerLog(): void
     {
-        $client = self::createClientWithDatabase();
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
         $client->request('GET', '/admin');
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
 

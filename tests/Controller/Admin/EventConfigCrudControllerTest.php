@@ -73,8 +73,7 @@ final class EventConfigCrudControllerTest extends AbstractEasyAdminControllerTes
 
     public function testIndexPage(): void
     {
-        $client = self::createClientWithDatabase();
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
         $crawler = $client->request('GET', '/admin');
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
 
@@ -88,8 +87,7 @@ final class EventConfigCrudControllerTest extends AbstractEasyAdminControllerTes
 
     public function testCreateEventConfig(): void
     {
-        $client = self::createClientWithDatabase();
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
         $client->request('GET', '/admin');
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
 
