@@ -24,7 +24,6 @@ final class EventAutomationExtensionTest extends AbstractDependencyInjectionExte
     protected function setUp(): void
     {
         // Extension类需要直接实例化进行测试，这是正常的测试模式
-        // @phpstan-ignore-next-line
         $this->extension = new EventAutomationExtension();
         $this->container = new ContainerBuilder();
         $this->container->setParameter('kernel.environment', 'test');

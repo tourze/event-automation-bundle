@@ -4,7 +4,7 @@ namespace EventAutomationBundle\DependencyInjection;
 
 use Tourze\SymfonyDependencyServiceLoader\AutoExtension;
 
-class EventAutomationExtension extends AutoExtension
+final class EventAutomationExtension extends AutoExtension
 {
     protected function getConfigDir(): string
     {
